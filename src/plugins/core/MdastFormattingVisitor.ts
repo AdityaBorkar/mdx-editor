@@ -3,7 +3,7 @@ import { MdxJsxTextElement } from 'mdast-util-mdx'
 import { IS_BOLD, IS_HIGHLIGHT, IS_ITALIC, IS_STRIKETHROUGH, IS_SUBSCRIPT, IS_SUPERSCRIPT, IS_UNDERLINE } from '../../FormatConstants'
 import { MdastImportVisitor } from '../../importMarkdownToLexical'
 
-type JsxNodeName = 'u' | 's' | 'sub' | 'sup' | 'mark'
+type JsxNodeName = 'u' | 'sub' | 'sup' | 'mark'
 
 interface OpeningJsxNode extends Mdast.HTML {
   type: 'html'
@@ -34,20 +34,17 @@ function isJsxNode(node: Mdast.Content, jsxName: JsxNodeName): node is JsxNode {
 
 // TODO - Figure out why opening / closing / basic is different and try to merge them
 
-// TODO - Create a better name and return type
-function isNode_JsxOrOpeningOrClosing(node: Mdast.Content, jsxName: JsxNodeName): node is JsxNode {
+function isNode_JsxOrOpeningOrClosing(node: Mdast.Content, jsxName: JsxNodeName): node is JsxNode | OpeningJsxNode | ClosingJsxNode {
   return isJsxNode(node, jsxName) || isOpeningJsxNode(node, jsxName) || isClosingJsxNode(node, jsxName)
 }
-
-// TODO - Reduce the below code duplication
 
 export const MdastFormattingVisitor: MdastImportVisitor<Mdast.Emphasis | Mdast.Strong | MdxJsxTextElement> = {
   testNode(mdastNode) {
     return (
-      mdastNode.type === 'emphasis' ||
       mdastNode.type === 'strong' ||
+      mdastNode.type === 'emphasis' ||
+      mdastNode.type === 'strikethrough' ||
       isNode_JsxOrOpeningOrClosing(mdastNode as Mdast.Content, 'u') ||
-      isNode_JsxOrOpeningOrClosing(mdastNode as Mdast.Content, 's') ||
       isNode_JsxOrOpeningOrClosing(mdastNode as Mdast.Content, 'sub') ||
       isNode_JsxOrOpeningOrClosing(mdastNode as Mdast.Content, 'sup') ||
       isNode_JsxOrOpeningOrClosing(mdastNode as Mdast.Content, 'mark')
@@ -55,20 +52,13 @@ export const MdastFormattingVisitor: MdastImportVisitor<Mdast.Emphasis | Mdast.S
   },
 
   visitNode({ mdastNode, lexicalParent, actions, mdastParent }) {
+    // TODO - Reduce the below code duplication
     if (isOpeningJsxNode(mdastNode, 'u')) {
       actions.addFormatting(IS_UNDERLINE, mdastParent as Mdast.Content)
       return
     }
     if (isClosingJsxNode(mdastNode, 'u')) {
       actions.removeFormatting(IS_UNDERLINE, mdastParent as Mdast.Content)
-      return
-    }
-    if (isOpeningJsxNode(mdastNode, 's')) {
-      actions.addFormatting(IS_STRIKETHROUGH, mdastParent as Mdast.Content)
-      return
-    }
-    if (isClosingJsxNode(mdastNode, 's')) {
-      actions.removeFormatting(IS_STRIKETHROUGH, mdastParent as Mdast.Content)
       return
     }
     if (isOpeningJsxNode(mdastNode, 'sub')) {
@@ -100,10 +90,10 @@ export const MdastFormattingVisitor: MdastImportVisitor<Mdast.Emphasis | Mdast.S
       actions.addFormatting(IS_ITALIC)
     } else if (mdastNode.type === 'strong') {
       actions.addFormatting(IS_BOLD)
+    } else if (mdastNode.type === 'strikethrough') {
+      actions.addFormatting(IS_STRIKETHROUGH)
     } else if (isJsxNode(mdastNode, 'u')) {
       actions.addFormatting(IS_UNDERLINE)
-    } else if (isJsxNode(mdastNode, 's')) {
-      actions.addFormatting(IS_STRIKETHROUGH)
     } else if (isJsxNode(mdastNode, 'sup')) {
       actions.addFormatting(IS_SUPERSCRIPT)
     } else if (isJsxNode(mdastNode, 'sub')) {

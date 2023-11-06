@@ -236,25 +236,25 @@ export function exportLexicalTreeToMdast({
   fixWrappingWhitespace(typedRoot, [])
 
   if (!jsxIsAvailable) {
-    convertInlineTextFormattingJsxToHtml(typedRoot)
+    convertTextFormattingJsxToHtml(typedRoot)
   }
 
   return typedRoot
 }
 
-const INLINE_TEXT_FORMATTING_JSX_NAME = ['u', 's', 'sub', 'sup', 'mark']
-function convertInlineTextFormattingJsxToHtml(node: Mdast.Parent | Mdast.Content) {
+const TEXT_FORMATTING_JSX_NAME = ['u', 'sub', 'sup', 'mark']
+function convertTextFormattingJsxToHtml(node: Mdast.Parent | Mdast.Content) {
   if (Object.hasOwn(node, 'children')) {
     const nodeAsParent = node as Mdast.Parent
     const newChildren = [] as Mdast.Content[]
     nodeAsParent.children.forEach((child) => {
-      if (child.type === 'mdxJsxTextElement' && INLINE_TEXT_FORMATTING_JSX_NAME.includes(child.name || '')) {
+      if (child.type === 'mdxJsxTextElement' && TEXT_FORMATTING_JSX_NAME.includes(child.name || '')) {
         newChildren.push(
           ...[{ type: 'html', value: `<${child.name}>` } as const, ...child.children, { type: 'html', value: `</${child.name}>` } as const]
         )
       } else {
         newChildren.push(child)
-        convertInlineTextFormattingJsxToHtml(child)
+        convertTextFormattingJsxToHtml(child)
       }
     })
     nodeAsParent.children = newChildren
@@ -264,6 +264,7 @@ function convertInlineTextFormattingJsxToHtml(node: Mdast.Parent | Mdast.Content
 const TRAILING_WHITESPACE_REGEXP = /\s+$/
 const LEADING_WHITESPACE_REGEXP = /^\s+/
 function fixWrappingWhitespace(node: Mdast.Parent | Mdast.Content, parentChain: Mdast.Parent[]) {
+  // TODO -
   if (node.type === 'strong' || node.type === 'emphasis') {
     const lastChild = node.children.at(-1)
     if (lastChild?.type === 'text') {

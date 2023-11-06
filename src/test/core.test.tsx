@@ -51,7 +51,7 @@ describe('markdown import export', () => {
   })
 
   it('works with strikethrough', () => {
-    testIdenticalMarkdown(`<s>Hello</s> World`)
+    testIdenticalMarkdown(`~~Hello~~ World`)
   })
 
   it('works with subscript', () => {

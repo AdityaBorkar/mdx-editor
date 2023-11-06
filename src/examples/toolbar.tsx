@@ -22,7 +22,7 @@ import {
   toolbarPlugin,
   Separator,
   BlockTypeSelect,
-  InlineTextFormattingToggles,
+  BoldItalicsUnderlineToggles,
   CreateLink,
   DiffSourceToggleWrapper,
   InsertImage,
@@ -31,6 +31,7 @@ import {
 import { ALL_PLUGINS, YoutubeDirectiveDescriptor, virtuosoSampleSandpackConfig } from './_boilerplate'
 import kitchenSinkMarkdown from './assets/kitchen-sink.md?raw'
 import './dark-editor.css'
+import { InlineFormattingToggles } from '../plugins/toolbar/components/InlineFormattingToggles'
 
 export const Basics = () => {
   return <MDXEditor markdown={kitchenSinkMarkdown} plugins={ALL_PLUGINS} />
@@ -50,7 +51,10 @@ export const ConditionalToolbar = () => {
             <>
               <DiffSourceToggleWrapper>
                 <UndoRedo />
-                <InlineTextFormattingToggles />
+                <BoldItalicsUnderlineToggles />
+                <Separator />
+                <InlineFormattingToggles options={['strikethrough', 'superscript', 'subscript', 'highlight']} />
+                <Separator />
                 <ListsToggle />
                 <Separator />
                 <BlockTypeSelect />
